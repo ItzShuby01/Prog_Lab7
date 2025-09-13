@@ -13,20 +13,20 @@ import java.sql.SQLException;
 // Starts the server, handles database connections, and manages the collection.
 public class ServerMain {
     public static void main(String[] args) {
-        if (args.length != 2) {
-            System.err.println("Usage: java -jar server.jar <db_username> <db_password>");
+        if (args.length != 3) {
+            System.err.println("Usage: java -jar server.jar <db_url> <db_username> <db_password>");
             return;
         }
-
-        String dbUsername = args[0];
-        String dbPassword = args[1];
+        String dbUrl = args[0];
+        String dbUsername = args[1];
+        String dbPassword = args[2];
 
         UDPServer server = null;
         Connection connection = null;
 
         try {
             // Establish database connection and DAO
-            DatabaseConnectionManager dbConnectionManager = new DatabaseConnectionManager(dbUsername, dbPassword);
+            DatabaseConnectionManager dbConnectionManager = new DatabaseConnectionManager(dbUrl, dbUsername, dbPassword);
             connection = dbConnectionManager.getConnection();
 
 
