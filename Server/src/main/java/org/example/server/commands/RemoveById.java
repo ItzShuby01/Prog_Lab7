@@ -5,7 +5,8 @@ import org.example.common.response.Response;
 import org.example.server.manager.CollectionManager;
 
 public class RemoveById implements ServerCommand {
-  public static final String DESCRIPTION = "remove_by_id id: remove an element from a collection by its id";
+  public static final String DESCRIPTION =
+      "remove_by_id id: remove an element from a collection by its id";
 
   private final CollectionManager collectionManager;
 
@@ -39,9 +40,10 @@ public class RemoveById implements ServerCommand {
       } else {
         // Return a specific error message if the person doesn't exist or is not owned by the user
         return new Response(
-                "Failed to remove person with ID " + id + ". It may not exist or you do not have permission to delete it.",
-                false
-        );
+            "Failed to remove person with ID "
+                + id
+                + ". It may not exist or you do not have permission to delete it.",
+            false);
       }
     } catch (NumberFormatException e) {
       return new Response("Invalid ID format: " + e.getMessage(), false);

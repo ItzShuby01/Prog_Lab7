@@ -25,14 +25,14 @@ public class ClientRunner {
   private final int serverPort;
   private final DatagramChannel clientChannel;
   private final InetSocketAddress serverSocketAddress;
-  private  String username ;
+  private String username;
   private String password;
   private final PersonIOService personIOService;
   private final IOService ioService;
   private final Set<String> executingScripts = new HashSet<>();
 
   public ClientRunner(String serverAddress, int serverPort, IOService ioService)
-          throws IOException {
+      throws IOException {
     this.serverAddress = serverAddress;
     this.serverPort = serverPort;
     this.ioService = ioService;
@@ -128,7 +128,8 @@ public class ClientRunner {
               case "remove_lower":
                 // Check if enough lines are left for a full Person object
                 if (lineIndex + 9 >= scriptLines.size()) {
-                  throw new IllegalArgumentException("Script ended unexpectedly. Missing person details.");
+                  throw new IllegalArgumentException(
+                      "Script ended unexpectedly. Missing person details.");
                 }
                 List<String> personData = scriptLines.subList(lineIndex, lineIndex + 10);
                 Person person = PersonBuilder.buildFromScript(personData);
@@ -220,7 +221,8 @@ public class ClientRunner {
     }
   }
 
-  private Response sendCommand(Serializable serializable) throws IOException, ClassNotFoundException {
+  private Response sendCommand(Serializable serializable)
+      throws IOException, ClassNotFoundException {
     byte[] commandBytes = SerializationUtil.serialize(serializable);
     ByteBuffer buffer = ByteBuffer.wrap(commandBytes);
     clientChannel.send(buffer, serverSocketAddress);

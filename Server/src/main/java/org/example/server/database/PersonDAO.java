@@ -24,6 +24,6 @@ public interface PersonDAO {
   // Deletes all Person objects from the database.
   boolean clear() throws SQLException;
 
-  //Deletes a Person object from the database by its ID and the owner's username.
+  // Deletes a Person object from the database by its ID and the owner's username.
   boolean removeByIdAndUsername(long id, String username) throws SQLException;
 }

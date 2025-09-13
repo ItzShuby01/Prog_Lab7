@@ -231,7 +231,7 @@ public class PersonDAOPostgreSQL implements PersonDAO {
   public boolean removeByIdAndUsername(long id, String username) throws SQLException {
     String sql = "DELETE FROM persons WHERE id = ? AND username = ?";
     try (Connection conn = connectionManager.getConnection();
-         PreparedStatement statement = conn.prepareStatement(sql)) {
+        PreparedStatement statement = conn.prepareStatement(sql)) {
       statement.setLong(1, id);
       statement.setString(2, username);
       int rowsAffected = statement.executeUpdate();

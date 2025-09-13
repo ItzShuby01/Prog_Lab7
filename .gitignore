@@ -4,6 +4,9 @@ target/
 !**/src/test/**/target/
 src/main/resources
 src/test/
+Client/target
+Common/target
+Server/target
 
 ### IntelliJ IDEA ###
 out/
