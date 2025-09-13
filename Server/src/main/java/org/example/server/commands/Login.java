@@ -2,15 +2,15 @@ package org.example.server.commands;
 
 import org.example.common.command.LoginCommand;
 import org.example.common.response.Response;
-import org.example.server.database.UserDAOPostgreSQL;
+import org.example.server.database.UserDAO;
 import java.sql.SQLException;
 
 public class Login implements ServerCommand {
     public static final String DESCRIPTION = "login: Authenticates a user with a username and password.";
 
-    private final UserDAOPostgreSQL userDAO;
+    private final UserDAO userDAO;
 
-    public Login(UserDAOPostgreSQL userDAO) {
+    public Login(UserDAO userDAO) {
         this.userDAO = userDAO;
     }
 
