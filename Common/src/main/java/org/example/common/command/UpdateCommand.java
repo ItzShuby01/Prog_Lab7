@@ -3,16 +3,29 @@ package org.example.common.command;
 import java.io.Serializable;
 import org.example.common.data.Person;
 
+
 public class UpdateCommand extends Command implements Serializable {
   private static final long serialVersionUID = 1L;
-  private final Person person; // The Person object with updated data
+  private final String arg;
+  private final Person person;
+  private final String username;
 
-  public UpdateCommand(String arg, Person person) { // 'arg' will typically be the ID string
-    super("update", arg);
+  public UpdateCommand(String arg, Person person, String username) {
+    super("add");
+    this.arg = arg;
     this.person = person;
+    this.username = username;
+  }
+
+  public String getArg() {
+    return arg;
   }
 
   public Person getPerson() {
     return person;
+  }
+
+  public String getUsername() {
+    return username;
   }
 }

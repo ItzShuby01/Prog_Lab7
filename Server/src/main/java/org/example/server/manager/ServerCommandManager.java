@@ -28,7 +28,7 @@ public class ServerCommandManager implements CommandExecutable {
   }
 
   private void initializeCommands() {
-    // Instantiate ALL server-side command classes (org.example.server.commands.*)
+    // Instantiating ALL server-side command classes (org.example.server.commands.*)
     Add addCmd = new Add(collectionManager);
     AddIfMax addIfMaxCmd = new AddIfMax(collectionManager);
     Update updateCmd = new Update(collectionManager);
@@ -90,7 +90,7 @@ public class ServerCommandManager implements CommandExecutable {
     commandInstances.put(name, instance); // Store ServerCommand instance for getDescription()
   }
 
-  // The core method for processing commands coming from the client (as DTOs)
+  // The core method for processing commands coming from the client as DTOs
   @Override
   public Response executeCommand(Command commandDto) {
     if (commandDto == null || commandDto.getName() == null) {

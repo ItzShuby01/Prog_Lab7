@@ -32,7 +32,7 @@ public class ServerMain {
       connection = dbConnectionManager.getConnection();
 
       PersonDAOPostgreSQL personDAO = new PersonDAOPostgreSQL(dbConnectionManager);
-      UserDAOPostgreSQL userDAO = new UserDAOPostgreSQL(connection);
+      UserDAOPostgreSQL userDAO = new UserDAOPostgreSQL(dbConnectionManager);
 
       // Initialize CollectionManager with the DAO
       CollectionManager collectionManager = new CollectionManager(personDAO);

@@ -1,6 +1,8 @@
 package org.example.server.commands;
 
 import java.sql.SQLException;
+import java.util.Optional;
+
 import org.example.common.command.RegisterCommand;
 import org.example.common.data.User;
 import org.example.common.response.Response;
@@ -30,8 +32,8 @@ public class Register implements ServerCommand {
 
     try {
       // Check if the username already exists
-      User existingUser = userDAO.findUserByUsername(username);
-      if (existingUser != null) {
+      Optional<User> existingUser = userDAO.findUserByUsername(username);
+      if (existingUser.isPresent()) {
         return new Response("Username already taken. Please choose another.", false);
       }
 

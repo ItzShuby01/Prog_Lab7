@@ -1,10 +1,12 @@
 package org.example.server.database;
 
 import java.sql.SQLException;
+import java.util.Optional;
+
 import org.example.common.data.User;
 
 public interface UserDAO {
-  User findUserByUsername(String username) throws SQLException;
+  Optional<User> findUserByUsername(String username) throws SQLException;
 
   boolean createUser(User user) throws SQLException;
 

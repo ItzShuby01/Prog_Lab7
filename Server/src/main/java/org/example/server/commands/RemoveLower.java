@@ -18,6 +18,7 @@ public class RemoveLower implements ServerCommand {
 
   public Response execute(RemoveLowerCommand commandDto) {
     Person thresholdPerson = commandDto.getPerson();
+    String username = commandDto.getUsername();
 
     if (thresholdPerson == null) {
       return new Response(
@@ -29,7 +30,7 @@ public class RemoveLower implements ServerCommand {
       return new Response("Validation Error for threshold person: " + validationError, false);
     }
 
-    collectionManager.removeLower(thresholdPerson);
+    collectionManager.removeLower(thresholdPerson, username);
     return new Response("Remove lower operation completed successfully.", true);
   }
 

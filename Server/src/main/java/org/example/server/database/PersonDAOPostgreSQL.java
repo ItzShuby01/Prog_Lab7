@@ -67,12 +67,12 @@ public class PersonDAOPostgreSQL implements PersonDAO {
     return persons;
   }
 
+  //Adds a new Person object to the database, associating it with a user.
   @Override
-  public boolean add(Person person) throws SQLException {
-    String sql =
-        "INSERT INTO persons (name, coordinates_x, coordinates_y, height, eye_color, hair_color, nationality, location_x, location_y, location_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+  public boolean add(Person person, String username) throws SQLException {
+    String sql = "INSERT INTO persons (name, coordinates_x, coordinates_y, height, eye_color, hair_color, nationality, location_x, location_y, location_name, owner_username) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     try (Connection conn = connectionManager.getConnection();
-        PreparedStatement statement = conn.prepareStatement(sql)) {
+         PreparedStatement statement = conn.prepareStatement(sql)) {
 
       statement.setString(1, person.getName());
       statement.setInt(2, person.getCoordinates().getX());
@@ -95,18 +95,19 @@ public class PersonDAOPostgreSQL implements PersonDAO {
         statement.setNull(9, Types.REAL);
         statement.setNull(10, Types.VARCHAR);
       }
+      statement.setString(11, username);
 
-      int rowsAffected = statement.executeUpdate();
-      return rowsAffected > 0;
+      return statement.executeUpdate() > 0;
     }
   }
 
+
+  // Updates an existing Person object, but only if the user owns it.
   @Override
-  public boolean update(long id, Person updatedPerson) throws SQLException {
-    String sql =
-        "UPDATE persons SET name = ?, coordinates_x = ?, coordinates_y = ?, height = ?, eye_color = ?, hair_color = ?, nationality = ?, location_x = ?, location_y = ?, location_name = ? WHERE id = ?";
+  public boolean update(long id, Person updatedPerson, String username) throws SQLException {
+    String sql = "UPDATE persons SET name = ?, coordinates_x = ?, coordinates_y = ?, height = ?, eye_color = ?, hair_color = ?, nationality = ?, location_x = ?, location_y = ?, location_name = ? WHERE id = ? AND owner_username = ?";
     try (Connection conn = connectionManager.getConnection();
-        PreparedStatement statement = conn.prepareStatement(sql)) {
+         PreparedStatement statement = conn.prepareStatement(sql)) {
 
       statement.setString(1, updatedPerson.getName());
       statement.setInt(2, updatedPerson.getCoordinates().getX());
@@ -114,7 +115,6 @@ public class PersonDAOPostgreSQL implements PersonDAO {
       statement.setDouble(4, updatedPerson.getHeight());
       statement.setString(5, updatedPerson.getEyeColor().name());
       statement.setString(6, updatedPerson.getHairColor().name());
-
       if (updatedPerson.getNationality() != null) {
         statement.setString(7, updatedPerson.getNationality().name());
       } else {
@@ -131,42 +131,30 @@ public class PersonDAOPostgreSQL implements PersonDAO {
         statement.setNull(10, Types.VARCHAR);
       }
       statement.setLong(11, id);
+      statement.setString(12, username);
 
-      int rowsAffected = statement.executeUpdate();
-      return rowsAffected > 0;
+      return statement.executeUpdate() > 0;
     }
   }
 
+  //Deletes all Person objects owned by a specific user from the database.
   @Override
-  public boolean delete(long id) throws SQLException {
-    String sql = "DELETE FROM persons WHERE id = ?";
+  public boolean clear(String username) throws SQLException {
+    String sql = "DELETE * FROM persons WHERE owner_username = ?";
     try (Connection conn = connectionManager.getConnection();
-        PreparedStatement statement = conn.prepareStatement(sql)) {
-
-      statement.setLong(1, id);
-
-      int rowsAffected = statement.executeUpdate();
-      return rowsAffected > 0;
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+      stmt.setString(1, username);
+      return stmt.executeUpdate() > 0;
     }
   }
 
-  @Override
-  public boolean clear() throws SQLException {
-    String sql = "DELETE * FROM persons";
+
+  public int removeLower(Person thresholdPerson, String username) throws SQLException {
+    String sql = "DELETE FROM persons WHERE id < ? AND owner_username = ?";
     try (Connection conn = connectionManager.getConnection();
-        PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-      stmt.executeUpdate();
-      return true;
-    }
-  }
-
-  public int removeLower(Person person) throws SQLException {
-    String sql = "DELETE FROM persons WHERE id < ?";
-    try (Connection conn = connectionManager.getConnection();
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-      pstmt.setLong(1, person.getId());
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+      pstmt.setDouble(1, thresholdPerson.getHeight());
+      pstmt.setString(2, username);
       return pstmt.executeUpdate();
     }
   }
@@ -202,34 +190,8 @@ public class PersonDAOPostgreSQL implements PersonDAO {
     return Optional.empty();
   }
 
-  private Person createPersonFromResultSet(ResultSet rs) throws SQLException {
-    long id = rs.getLong("id");
-    String name = rs.getString("name");
-    Coordinates coordinates =
-        new Coordinates(rs.getInt("coordinates_x"), rs.getDouble("coordinates_y"));
-    LocalDateTime creationDate = rs.getTimestamp("creation_date").toLocalDateTime();
-    double height = rs.getDouble("height");
-    EyeColor eyeColor = EyeColor.valueOf(rs.getString("eye_color"));
-    HairColor hairColor = HairColor.valueOf(rs.getString("hair_color"));
-    Country nationality = Country.valueOf(rs.getString("nationality"));
-    Location location =
-        new Location(
-            rs.getFloat("location_x"), rs.getFloat("location_y"), rs.getString("location_name"));
-
-    return new Person(
-        (int) id,
-        name,
-        coordinates,
-        creationDate,
-        height,
-        eyeColor,
-        hairColor,
-        nationality,
-        location);
-  }
-
   public boolean removeByIdAndUsername(long id, String username) throws SQLException {
-    String sql = "DELETE FROM persons WHERE id = ? AND username = ?";
+    String sql = "DELETE FROM persons WHERE id = ? AND owner_username = ?";
     try (Connection conn = connectionManager.getConnection();
         PreparedStatement statement = conn.prepareStatement(sql)) {
       statement.setLong(1, id);

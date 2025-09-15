@@ -17,7 +17,9 @@ public class Clear implements ServerCommand {
   // Takes a ClearCommand DTO and returns a Response DTO.
 
   public Response execute(ClearCommand commandDto) {
-    collectionManager.clear();
+    String username = commandDto.getUsername();
+
+    collectionManager.clear(username);
     return new Response("Collection has been cleared successfully.", true);
   }
 

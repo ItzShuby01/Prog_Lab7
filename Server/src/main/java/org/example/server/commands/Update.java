@@ -19,6 +19,7 @@ public class Update implements ServerCommand {
 
   public Response execute(UpdateCommand commandDto) {
     String idArg = commandDto.getArg();
+    String username = commandDto.getUsername();
     Person updatedPerson = commandDto.getPerson(); // This is the new Person data
 
     if (idArg == null || idArg.trim().isEmpty()) {
@@ -46,7 +47,7 @@ public class Update implements ServerCommand {
       }
 
       // Perform the update
-      if (collectionManager.updatePerson(id, updatedPerson)) {
+      if (collectionManager.updatePerson(id, updatedPerson, username)) {
         return new Response("Person with ID " + id + " updated successfully.", true);
       } else {
         Optional<Person> existing = collectionManager.getById(id);

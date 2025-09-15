@@ -32,7 +32,7 @@ public class ClientRunner {
   private final Set<String> executingScripts = new HashSet<>();
 
   public ClientRunner(String serverAddress, int serverPort, IOService ioService)
-      throws IOException {
+          throws IOException {
     this.serverAddress = serverAddress;
     this.serverPort = serverPort;
     this.ioService = ioService;
@@ -129,7 +129,7 @@ public class ClientRunner {
                 // Check if enough lines are left for a full Person object
                 if (lineIndex + 9 >= scriptLines.size()) {
                   throw new IllegalArgumentException(
-                      "Script ended unexpectedly. Missing person details.");
+                          "Script ended unexpectedly. Missing person details.");
                 }
                 List<String> personData = scriptLines.subList(lineIndex, lineIndex + 10);
                 Person person = PersonBuilder.buildFromScript(personData);
@@ -137,16 +137,16 @@ public class ClientRunner {
 
                 switch (commandName) {
                   case "add":
-                    commandDto = new AddCommand(arg, person);
+                    commandDto = new AddCommand(arg, person, username);
                     break;
                   case "add_if_max":
-                    commandDto = new AddIfMaxCommand(arg, person);
+                    commandDto = new AddIfMaxCommand(arg, person, username);
                     break;
                   case "update":
-                    commandDto = new UpdateCommand(arg, person);
+                    commandDto = new UpdateCommand(arg, person, username);
                     break;
                   case "remove_lower":
-                    commandDto = new RemoveLowerCommand(arg, person);
+                    commandDto = new RemoveLowerCommand(arg, person, username);
                     break;
                   default:
                     throw new IllegalStateException("Unexpected command in script.");
@@ -182,29 +182,29 @@ public class ClientRunner {
       case "add":
         ioService.print("--- Entering Person details for 'add' ---");
         Person person = personIOService.readPerson();
-        return new AddCommand(arg, person);
+        return new AddCommand(arg, person, username);
       case "update":
         if (arg == null || arg.isEmpty()) {
           throw new IllegalArgumentException("Update command requires an ID.");
         }
         ioService.print("--- Entering new Person details for 'update' (ID: " + arg + ") ---");
         Person updatedPerson = personIOService.readPerson();
-        return new UpdateCommand(arg, updatedPerson);
+        return new UpdateCommand(arg, updatedPerson, username);
       case "remove_by_id":
         if (arg == null || arg.isEmpty()) {
           throw new IllegalArgumentException("remove_by_id requires an ID.");
         }
-        return new RemoveByIdCommand(arg);
+        return new RemoveByIdCommand(arg, username);
       case "clear":
-        return new ClearCommand(arg);
+        return new ClearCommand(arg, username);
       case "add_if_max":
         ioService.print("--- Entering Person details for 'add_if_max' ---");
         Person addIfMaxPerson = personIOService.readPerson();
-        return new AddIfMaxCommand(arg, addIfMaxPerson);
+        return new AddIfMaxCommand(arg, addIfMaxPerson, username);
       case "remove_lower":
         ioService.print("--- Entering Person details for 'remove_lower' ---");
         Person removeLowerPerson = personIOService.readPerson();
-        return new RemoveLowerCommand(arg, removeLowerPerson);
+        return new RemoveLowerCommand(arg, removeLowerPerson, username);
       case "history":
         return new HistoryCommand(arg);
       case "max_by_id":
@@ -222,7 +222,7 @@ public class ClientRunner {
   }
 
   private Response sendCommand(Serializable serializable)
-      throws IOException, ClassNotFoundException {
+          throws IOException, ClassNotFoundException {
     byte[] commandBytes = SerializationUtil.serialize(serializable);
     ByteBuffer buffer = ByteBuffer.wrap(commandBytes);
     clientChannel.send(buffer, serverSocketAddress);

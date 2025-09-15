@@ -20,12 +20,14 @@ public class AddIfMax implements ServerCommand {
   public Response execute(AddIfMaxCommand commandDto) {
     try {
       Person newPerson = commandDto.getPerson();
+      String username = commandDto.getUsername(); // Get username from the DTO
+
       Optional<Double> currentMaxHeightOptional = collectionManager.getMaxHeight();
 
       if (currentMaxHeightOptional.isPresent()) {
         double currentMaxHeight = currentMaxHeightOptional.get();
         if (newPerson.getHeight() > currentMaxHeight) {
-          collectionManager.addPerson(newPerson);
+          collectionManager.addPerson(newPerson, username);
           return new Response(
               "Person added successfully, as its height > the current maximum.", true);
         } else {
@@ -33,7 +35,7 @@ public class AddIfMax implements ServerCommand {
         }
       } else {
         // If the collection is empty, any person can be added
-        collectionManager.addPerson(newPerson);
+        collectionManager.addPerson(newPerson, username);
         return new Response("Collection was empty. Person added successfully.", true);
       }
     } catch (SQLException e) {

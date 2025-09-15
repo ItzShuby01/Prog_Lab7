@@ -37,7 +37,7 @@ public class CollectionManager {
     }
   }
 
-  // All methods below now  use the PersonDAOPostgreSQL class
+  // All methods below now use the PersonDAOPostgreSQL class
   public Set<Person> getCollection() {
     return Collections.unmodifiableSet(personCollection);
   }
@@ -54,11 +54,11 @@ public class CollectionManager {
     return creationDate;
   }
 
-  public boolean addPerson(Person person) {
+  public boolean addPerson(Person person, String username) {
     try {
-      boolean success = personDAO.add(person);
+      boolean success = personDAO.add(person, username);
       if (success) {
-        loadCollectionFromDatabase(); // Reload after adding
+        loadCollectionFromDatabase();
       }
       return success;
     } catch (SQLException e) {
@@ -66,27 +66,13 @@ public class CollectionManager {
       return false;
     }
   }
-
-  public boolean removePerson(Person person) {
+  public void clear(String username) {
     try {
-      boolean success = personDAO.delete(person.getId());
-      if (success) {
-        loadCollectionFromDatabase(); // Reload after removing
-      }
-      return success;
-    } catch (SQLException e) {
-      Logger.error("Failed to remove person from database: " + e.getMessage());
-      return false;
-    }
-  }
-
-  public void clear() {
-    try {
-      if (personDAO.clear()) {
-        personCollection.clear();
-        Logger.info("Collection cleared successfully.");
+      if (personDAO.clear(username)) {
+        loadCollectionFromDatabase();
+        Logger.info("Collection cleared successfully for user: " + username);
       } else {
-        Logger.warn("Database clear operation failed.");
+        Logger.warn("Database clear operation failed for user: " + username);
       }
     } catch (SQLException e) {
       Logger.error("Error clearing collection: " + e.getMessage());
@@ -110,11 +96,11 @@ public class CollectionManager {
     return personCollection.stream().filter(p -> p.getId() != null && p.getId() == id).findFirst();
   }
 
-  public boolean updatePerson(long id, Person updatedPerson) {
+  public boolean updatePerson(long id, Person updatedPerson, String username) {
     try {
-      boolean success = personDAO.update(id, updatedPerson);
+      boolean success = personDAO.update(id, updatedPerson, username);
       if (success) {
-        loadCollectionFromDatabase(); // Reload after updating
+        loadCollectionFromDatabase();
       }
       return success;
     } catch (SQLException e) {
@@ -123,11 +109,11 @@ public class CollectionManager {
     }
   }
 
-  public int removeLower(Person threshold) {
+  public int removeLower(Person threshold, String username) {
     try {
-      int rowsAffected = personDAO.removeLower(threshold);
+      int rowsAffected = personDAO.removeLower(threshold, username);
       if (rowsAffected > 0) {
-        loadCollectionFromDatabase(); // Reload after removing
+        loadCollectionFromDatabase();
       }
       return rowsAffected;
     } catch (SQLException e) {
