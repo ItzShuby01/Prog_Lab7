@@ -23,49 +23,52 @@ public class PersonDAOPostgreSQL implements PersonDAO {
     Set<Person> persons = new TreeSet<>();
     String sql = "SELECT * FROM persons ORDER BY id ASC";
     try (Connection conn = connectionManager.getConnection();
-        PreparedStatement statement = conn.prepareStatement(sql);
-        ResultSet rs = statement.executeQuery()) {
+         PreparedStatement statement = conn.prepareStatement(sql);
+         ResultSet rs = statement.executeQuery()) {
 
       while (rs.next()) {
         long id = rs.getLong("id");
         String name = rs.getString("name");
+
         Coordinates coordinates =
-            new Coordinates(rs.getInt("coordinates_x"), rs.getDouble("coordinates_y"));
+                new Coordinates(Integer.valueOf(rs.getInt("coordinates_x")), rs.getDouble("coordinates_y"));
         LocalDateTime creationDate = rs.getTimestamp("creation_date").toLocalDateTime();
         double height = rs.getDouble("height");
         EyeColor eyeColor = EyeColor.valueOf(rs.getString("eye_color"));
         HairColor hairColor = HairColor.valueOf(rs.getString("hair_color"));
         Country nationality =
-            rs.getString("nationality") != null
-                ? Country.valueOf(rs.getString("nationality"))
-                : null;
+                rs.getString("nationality") != null
+                        ? Country.valueOf(rs.getString("nationality"))
+                        : null;
 
         // Handle location
         Location location = null;
         if (rs.getObject("location_x") != null) {
           location =
-              new Location(
-                  rs.getFloat("location_x"),
-                  rs.getFloat("location_y"),
-                  rs.getString("location_name"));
+                  new Location(
+                          rs.getFloat("location_x"),
+                          Float.valueOf(rs.getFloat("location_y")),
+                          rs.getString("location_name"));
         }
 
         Person person =
-            new Person(
-                (int) id,
-                name,
-                coordinates,
-                creationDate,
-                height,
-                eyeColor,
-                hairColor,
-                nationality,
-                location);
+                new Person(
+                        Integer.valueOf((int) id),
+                        name,
+                        coordinates,
+                        creationDate,
+                        Double.valueOf(height),
+                        eyeColor,
+                        hairColor,
+                        nationality,
+                        location);
+
         persons.add(person);
       }
     }
     return persons;
   }
+
 
   //Adds a new Person object to the database, associating it with a user.
   @Override
@@ -140,7 +143,7 @@ public class PersonDAOPostgreSQL implements PersonDAO {
   //Deletes all Person objects owned by a specific user from the database.
   @Override
   public boolean clear(String username) throws SQLException {
-    String sql = "DELETE * FROM persons WHERE owner_username = ?";
+    String sql = "DELETE FROM persons WHERE owner_username = ?";
     try (Connection conn = connectionManager.getConnection();
          PreparedStatement stmt = conn.prepareStatement(sql)) {
       stmt.setString(1, username);

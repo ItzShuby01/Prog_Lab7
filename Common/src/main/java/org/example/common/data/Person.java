@@ -89,7 +89,7 @@ public class Person implements Comparable<Person>, Serializable {
 
   // Setters
   public void setId(int id) {
-    this.id = id;
+    this.id = Integer.valueOf(id);
   }
 
   public void setName(String name) {
@@ -159,6 +159,11 @@ public class Person implements Comparable<Person>, Serializable {
 
   @Override
   public int compareTo(Person other) {
-    return Double.compare(this.height, other.height);
+    // compare based on a the ID.
+    if (this.id == null || other.id == null) {
+      // Fallback for objects that haven't been saved to the DB yet. This prevents a NullPointerException.
+      return Double.compare(this.height, other.height);
+    }
+    return this.id.compareTo(other.id);
   }
 }

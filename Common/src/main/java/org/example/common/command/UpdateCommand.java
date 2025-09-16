@@ -11,7 +11,7 @@ public class UpdateCommand extends Command implements Serializable {
   private final String username;
 
   public UpdateCommand(String arg, Person person, String username) {
-    super("add");
+    super("update");
     this.arg = arg;
     this.person = person;
     this.username = username;

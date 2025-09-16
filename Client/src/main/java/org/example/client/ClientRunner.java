@@ -8,6 +8,7 @@ import java.nio.channels.DatagramChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.example.client.util.IOService;
@@ -95,10 +96,10 @@ public class ClientRunner {
     try {
       System.out.println("Executing script from file: " + filePath);
       List<String> scriptLines = Files.readAllLines(Path.of(filePath));
-      int lineIndex = 0;
+      Iterator<String> scriptIterator = scriptLines.iterator();
 
-      while (lineIndex < scriptLines.size()) {
-        String line = scriptLines.get(lineIndex++).trim();
+      while (scriptIterator.hasNext()) {
+        String line = scriptIterator.next().trim();
         if (line.isEmpty() || line.startsWith("#")) {
           continue;
         }
@@ -126,14 +127,8 @@ public class ClientRunner {
               case "add_if_max":
               case "update":
               case "remove_lower":
-                // Check if enough lines are left for a full Person object
-                if (lineIndex + 9 >= scriptLines.size()) {
-                  throw new IllegalArgumentException(
-                          "Script ended unexpectedly. Missing person details.");
-                }
-                List<String> personData = scriptLines.subList(lineIndex, lineIndex + 10);
-                Person person = PersonBuilder.buildFromScript(personData);
-                lineIndex += 10;
+                // The PersonBuilder now handles reading from the iterator
+                Person person = PersonBuilder.buildFromScript(scriptIterator);
 
                 switch (commandName) {
                   case "add":

@@ -9,7 +9,7 @@ public class ClearCommand extends Command implements Serializable {
   private final String username;
 
   public ClearCommand(String arg, String username) {
-    super("remove_by_id");
+    super("clear");
     this.arg = arg;
     this.username = username;
   }

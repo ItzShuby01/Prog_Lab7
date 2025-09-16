@@ -11,7 +11,7 @@ public class AddIfMaxCommand extends Command implements Serializable {
   private final String username;
 
   public AddIfMaxCommand(String arg, Person person, String username) {
-    super("add");
+    super("add_if_max");
     this.arg = arg;
     this.person = person;
     this.username = username;

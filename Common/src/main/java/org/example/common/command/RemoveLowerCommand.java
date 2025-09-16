@@ -11,7 +11,7 @@ public class RemoveLowerCommand extends Command implements Serializable {
   private final String username;
 
   public RemoveLowerCommand(String arg, Person person, String username) {
-    super("add");
+    super("remove_lower");
     this.arg = arg;
     this.person = person;
     this.username = username;

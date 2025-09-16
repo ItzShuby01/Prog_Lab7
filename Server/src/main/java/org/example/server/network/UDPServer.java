@@ -46,7 +46,7 @@ public class UDPServer {
     selector = Selector.open();
     channel.register(selector, SelectionKey.OP_READ);
 
-    System.out.println("Server started on UDP port " + port);
+    System.out.println("Server listening on UDP port " + port);
 
     while (running) {
       try {
