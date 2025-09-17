@@ -20,7 +20,7 @@ public class MaxById implements ServerCommand {
     Optional<Person> maxPerson = collectionManager.getMaxById();
     if (maxPerson.isPresent()) {
       // Return the Person object in the data payload
-      return new Response("Person with maximum ID:", true, maxPerson);
+      return new Response("Person with maximum ID:", true, maxPerson.get());
     } else {
       return new Response(
           "Collection is empty. No person with maximum ID found.",

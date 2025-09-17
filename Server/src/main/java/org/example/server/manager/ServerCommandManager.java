@@ -6,7 +6,6 @@ import java.util.function.Function;
 import org.example.common.command.*;
 import org.example.common.response.Response;
 import org.example.server.commands.*;
-import org.example.server.commands.CommandExecutable;
 import org.example.server.database.UserDAOPostgreSQL;
 
 // This class acts as the central dispatcher for server-side commands.
@@ -14,16 +13,18 @@ import org.example.server.database.UserDAOPostgreSQL;
 public class ServerCommandManager implements CommandExecutable {
   private final CollectionManager collectionManager;
   private final UserDAOPostgreSQL userDAO;
-  private final LinkedList<String> commandHistory = new LinkedList<>();
-  private final Map<String, Function<Command, Response>> commandHandlers = new HashMap<>();
+  private final CommandManager commandManager; // Use the dedicated CommandManager
 
   // This map stores instances of server-side command handlers for easy access to their descriptions
   // and execution logic.
   private final Map<String, ServerCommand> commandInstances = new HashMap<>();
+  private final Map<String, Function<Command, Response>> commandHandlers = new HashMap<>();
 
-  public ServerCommandManager(CollectionManager collectionManager, UserDAOPostgreSQL userDAO) {
+
+  public ServerCommandManager(CollectionManager collectionManager, UserDAOPostgreSQL userDAO, CommandManager commandManager) {
     this.collectionManager = collectionManager;
     this.userDAO = userDAO;
+    this.commandManager = commandManager; // Injecting the CommandManager
     initializeCommands();
   }
 
@@ -35,7 +36,8 @@ public class ServerCommandManager implements CommandExecutable {
     AverageOfHeight averageOfHeightCmd = new AverageOfHeight(collectionManager);
     Clear clearCmd = new Clear(collectionManager);
     CountByLocation countByLocationCmd = new CountByLocation(collectionManager);
-    History historyCmd = new History();
+    // Pass the CommandManager to the History command
+    History historyCmd = new History(commandManager);
     Info infoCmd = new Info(collectionManager);
     MaxById maxByIdCmd = new MaxById(collectionManager);
     RemoveById removeByIdCmd = new RemoveById(collectionManager);
@@ -51,41 +53,39 @@ public class ServerCommandManager implements CommandExecutable {
     // method.
     registerServerCommand("add", cmd -> addCmd.execute((AddCommand) cmd), addCmd);
     registerServerCommand(
-        "add_if_max", cmd -> addIfMaxCmd.execute((AddIfMaxCommand) cmd), addIfMaxCmd);
+            "add_if_max", cmd -> addIfMaxCmd.execute((AddIfMaxCommand) cmd), addIfMaxCmd);
     registerServerCommand(
-        "average_of_height",
-        cmd -> {
-          try {
-            return averageOfHeightCmd.execute((AverageOfHeightCommand) cmd);
-          } catch (SQLException e) {
-            throw new RuntimeException(e);
-          }
-        },
-        averageOfHeightCmd);
+            "average_of_height",
+            cmd -> {
+              try {
+                return averageOfHeightCmd.execute((AverageOfHeightCommand) cmd);
+              } catch (SQLException e) {
+                throw new RuntimeException(e);
+              }
+            },
+            averageOfHeightCmd);
     registerServerCommand("clear", cmd -> clearCmd.execute((ClearCommand) cmd), clearCmd);
     registerServerCommand("count_by_location", countByLocationCmd::execute, countByLocationCmd);
     registerServerCommand("help", cmd -> helpCmd.execute((HelpCommand) cmd), helpCmd);
-    registerServerCommand(
-        "history",
-        cmd -> historyCmd.execute((HistoryCommand) cmd, new ArrayList<>(commandHistory)),
-        historyCmd);
+    // Corrected: The history command now has a no-arg execute method.
+    registerServerCommand("history", cmd -> historyCmd.execute((HistoryCommand) cmd), historyCmd);
     registerServerCommand("info", cmd -> infoCmd.execute((InfoCommand) cmd), infoCmd);
     registerServerCommand("max_by_id", cmd -> maxByIdCmd.execute((MaxByIdCommand) cmd), maxByIdCmd);
     registerServerCommand(
-        "remove_by_id", cmd -> removeByIdCmd.execute((RemoveByIdCommand) cmd), removeByIdCmd);
+            "remove_by_id", cmd -> removeByIdCmd.execute((RemoveByIdCommand) cmd), removeByIdCmd);
     registerServerCommand(
-        "remove_lower", cmd -> removeLowerCmd.execute((RemoveLowerCommand) cmd), removeLowerCmd);
+            "remove_lower", cmd -> removeLowerCmd.execute((RemoveLowerCommand) cmd), removeLowerCmd);
     registerServerCommand("show", cmd -> showCmd.execute((ShowCommand) cmd), showCmd);
     registerServerCommand("update", cmd -> updateCmd.execute((UpdateCommand) cmd), updateCmd);
 
     registerServerCommand("login", cmd -> loginCmd.execute((LoginCommand) cmd), loginCmd);
     registerServerCommand(
-        "register", cmd -> registerCmd.execute((RegisterCommand) cmd), registerCmd);
+            "register", cmd -> registerCmd.execute((RegisterCommand) cmd), registerCmd);
   }
 
   // Helper method to register commands consistently
   private void registerServerCommand(
-      String name, Function<Command, Response> handler, ServerCommand instance) {
+          String name, Function<Command, Response> handler, ServerCommand instance) {
     commandHandlers.put(name, handler);
     commandInstances.put(name, instance); // Store ServerCommand instance for getDescription()
   }
@@ -101,16 +101,17 @@ public class ServerCommandManager implements CommandExecutable {
     Function<Command, Response> handler = commandHandlers.get(commandName);
 
     if (handler != null) {
-      addToHistory(commandName);
+      // Use the injected CommandManager to add to history
+      commandManager.addCommandToHistory(commandName);
       try {
         return handler.apply(commandDto);
       } catch (ClassCastException e) {
         return new Response(
-            "Internal server error: Mismatched command DTO type for '"
-                + commandName
-                + "'. "
-                + e.getMessage(),
-            false);
+                "Internal server error: Mismatched command DTO type for '"
+                        + commandName
+                        + "'. "
+                        + e.getMessage(),
+                false);
       } catch (Exception e) {
         System.err.println("Error executing command '" + commandName + "': " + e.getMessage());
         return new Response("Server error during command execution: " + e.getMessage(), false);
@@ -125,11 +126,5 @@ public class ServerCommandManager implements CommandExecutable {
     Map<String, String> descriptions = new TreeMap<>();
     commandInstances.forEach((name, cmd) -> descriptions.put(name, cmd.getDescription()));
     return descriptions;
-  }
-
-  // Helper method for 'History'
-  public void addToHistory(String cmdName) {
-    if (commandHistory.size() == 7) commandHistory.removeFirst();
-    commandHistory.add(cmdName);
   }
 }

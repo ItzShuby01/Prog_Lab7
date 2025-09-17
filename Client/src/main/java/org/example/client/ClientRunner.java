@@ -72,7 +72,7 @@ public class ClientRunner {
           Command commandDto = processCommand(commandName, arg);
           if (commandDto != null) {
             Response response = sendCommand(commandDto);
-            System.out.println("Server Response: " + response.getMessage());
+            displayResponse(response);
           }
         }
       } catch (Exception e) {
@@ -153,7 +153,7 @@ public class ClientRunner {
             }
 
             Response response = sendCommand(commandDto);
-            System.out.println("Server Response for '" + line + "': " + response.getMessage());
+            displayResponse(response);
           }
         } catch (Exception e) {
           System.err.println("Error executing script command '" + line + "': " + e.getMessage());
@@ -248,6 +248,22 @@ public class ClientRunner {
       return sendCommand(registerCommand);
     } catch (ClassNotFoundException e) {
       throw new IOException("Error deserializing server response.", e);
+    }
+  }
+
+  private void displayResponse(Response response) {
+    // Print the main message from the response
+    ioService.print("Server Response: " + response.getMessage());
+
+    // Check if there's a specific object to display
+    if (response.getData() != null) {
+      // If it's a collection, iterate and print each item on a new line
+      if (response.getData() instanceof Iterable<?>) {
+        ((Iterable<?>) response.getData()).forEach(item -> ioService.print(item.toString()));
+      } else {
+        // Otherwise, just print the object's toString()
+        ioService.print(response.getData().toString());
+      }
     }
   }
 

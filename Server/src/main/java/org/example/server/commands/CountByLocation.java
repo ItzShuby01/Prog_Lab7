@@ -29,7 +29,7 @@ public class CountByLocation implements ServerCommand {
 
       long count = collectionManager.countByLocation(locationToCompare);
       return new Response(
-          "Number of people with location " + locationToCompare + ": " + count, true);
+          "Number of people with location " + locationToCompare + " is : " + count, true);
     } catch (IllegalArgumentException e) {
       return new Response("Error parsing location argument: " + e.getMessage(), false);
     } catch (Exception e) {

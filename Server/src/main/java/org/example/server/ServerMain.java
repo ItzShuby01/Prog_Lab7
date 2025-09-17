@@ -6,6 +6,7 @@ import org.example.common.util.Logger;
 import org.example.server.database.PersonDAOPostgreSQL;
 import org.example.server.database.UserDAOPostgreSQL;
 import org.example.server.manager.CollectionManager;
+import org.example.server.manager.CommandManager;
 import org.example.server.manager.ServerCommandManager;
 import org.example.server.network.UDPServer;
 import org.example.server.util.DatabaseConnectionManager;
@@ -34,10 +35,11 @@ public class ServerMain {
       PersonDAOPostgreSQL personDAO = new PersonDAOPostgreSQL(dbConnectionManager);
       UserDAOPostgreSQL userDAO = new UserDAOPostgreSQL(dbConnectionManager);
 
-      // Initialize CollectionManager with the DAO
+      // Initialize Managers with the DAO
+      CommandManager commandManager = new CommandManager();
       CollectionManager collectionManager = new CollectionManager(personDAO);
       ServerCommandManager serverCommandManager =
-          new ServerCommandManager(collectionManager, userDAO);
+          new ServerCommandManager(collectionManager, userDAO, commandManager);
       Logger.info("Collection loaded from database successfully!");
 
       // Start the server
